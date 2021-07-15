@@ -14,23 +14,23 @@ logger = logging.getLogger(__name__)
 import matplotlib.pyplot as plt
 import PMB.imutils.graphics as gr
 import math
-import scipy.special as ss
 
 
 
-class beam():
-    def  __init__(self,amplitude=None,phase=None,input_field=None,wavelength=500e-9,width=1e-3,num=512,units='m',name='beam'):
-        """ basic beam container class, 
+
+class Beam():
+    def  __init__(self,amplitude=None,phase=None,input_field=None,wavelength=500e-9,width=1e-3,num=512,units='m',name='Beam'):
+        """ basic Beam container class,
         Parameters
         ----------
         amplitude - numpy array (real only) amplitude
         phase - numpy arrays (real only). phase will be set to zero if amplitude is set but phase is not. 
         input_field  - numpy array (complex data) sets a complex amplitude field. amplitude and phase are ignored if this is set. 
-        wavelength - float. The wavelength of the beam.
+        wavelength - float. The wavelength of the Beam.
         width - float. The physical width of the array data 
         num  - int. The the number of rows of pixels in the array (ignored if amplitude/phase/field are set).
         units - string. The phyiscal name of the width unit. For reference only, it has not effect.
-        name - string. The name of the beam. For reference only, it has not effect.
+        name - string. The name of the Beam. For reference only, it has not effect.
         """
         self.units = units
         self.name = name
@@ -52,47 +52,60 @@ class beam():
         
     def __iadd__(self,beam2):
         """
-        Adds beam2 complex field to the beam.
-        :param beam2:  either a beam class or a scalar or numpy array of same size as beam
+        Adds beam2 complex field to the Beam.
+        :param beam2:  either a Beam class or a scalar or numpy array of same size as Beam
         :return: added beams
         """
-        if isinstance(beam2, beam):
+        if isinstance(beam2, Beam):
             # TODO test physical parameters match,
             self.field = self.field+beam2.field
         else:
             self.field = self.field+beam2
         return self
 
+    def __sub__(self, beam2):
+        """
+                Subtracts beam2 complex field to the Beam.
+                :param beam2:  either a Beam class or a scalar or numpy array of same size as Beam
+                :return: added beams
+                """
+        # TODO test physical parameters match,
+        if isinstance(beam2, Beam):
+            f = self.field - beam2.field
+        else:
+            f = self.field - beam2
+        return Beam(input_field=f)
+
     def __add__(self,beam2):
         """
-        Adds beam2 complex field to the beam.
-        :param beam2:  either a beam class or a scalar or numpy array of same size as beam
+        Adds beam2 complex field to the Beam.
+        :param beam2:  either a Beam class or a scalar or numpy array of same size as Beam
         :return: added beams
         """
         # TODO test physical parameters match,
-        if isinstance(beam2, beam):
+        if isinstance(beam2, Beam):
             f = self.field+beam2.field
         else:
             f = self.field+beam2
-        return beam(input_field=f)
+        return Beam(input_field=f)
 
     def __mul__(self, b2):
         """
-        Multiples beam2 complex field to the beam.
-        :param beam2:  either a beam class or a scalar or numpy array of same size as beam
+        Multiples beam2 complex field to the Beam.
+        :param beam2:  either a Beam class or a scalar or numpy array of same size as Beam
         :return: multiplied beams
         """
         # TODO test physical parameters match,
-        if isinstance(b2, beam):
+        if isinstance(b2, Beam):
             f = self.field*b2.field
         else:
             f = self.field*b2
-        return beam(input_field=f)
+        return Beam(input_field=f)
 
     def __imul__(self, b2):
         """
-        Multiples beam2 complex field to the beam.
-        :param beam2:  either a beam class or a scalar or numpy array of same size as beam
+        Multiples beam2 complex field to the Beam.
+        :param beam2:  either a Beam class or a scalar or numpy array of same size as Beam
         :return: multiplied beams
         """
         # TODO test physical parameters match, I don't think the inplace mul is needed, test this
@@ -101,7 +114,7 @@ class beam():
 
     def copy(self):
         """
-        :return: deepcopy of beam
+        :return: deepcopy of Beam
         """
         return deepcopy(self)
 
@@ -109,7 +122,7 @@ class beam():
         """splits the amplitude by the amount of ratio
         Returns
         --------
-        (a,b) new beam objects with ratio and 1-ratio repestively
+        (a,beam) new Beam objects with ratio and 1-ratio repestively
         """
         a = self.copy(self)
         b = self.copy(self)
@@ -118,9 +131,9 @@ class beam():
         return a, b
 
     def clone_parameters(self):
-        """Creates a new beam with the same parameters - but no amplitude/phase data"""
+        """Creates a new Beam with the same parameters - but no amplitude/phase data"""
         self._argdict = {k: self.__dict__[k] for k in self._arglist}
-        return beam(**self._argdict)
+        return Beam(**self._argdict)
 
     @property
     def num(self):
@@ -158,12 +171,12 @@ class beam():
 
     def add_buffer(self,number):
         """
-        adds zero buffering to beam, also update physical width
-        :param number: new width of beam
+        adds zero buffering to Beam, also update physical width
+        :param number: new width of Beam
         :return: nothing
         """
         self.width = self.width/self.num * number
-        logger.debug(f"New beam width = {self.width}")
+        logger.debug(f"New Beam width = {self.width}")
         z = np.zeros((number,number),dtype=complex)
         offset = (number - self.num )//2
         end = (self.num + number)//2
@@ -172,7 +185,7 @@ class beam():
 
     def clip_beam(self, new_width):
         """
-        Physically clip the beam with a rectangle mask, reduces physical size and number of pixels
+        Physically clip the Beam with a rectangle mask, reduces physical size and number of pixels
         :param new_width: new physical size
         :return: nothing
         """
@@ -187,36 +200,36 @@ class beam():
 
 
 
-class square_beam(beam):
+class SquareBeam(Beam):
     """
-    Create a square beam
+    Create a square Beam
     """
     def __init__(self, num=512, size=1e-4, width=1e-3, offx=0, offy=0, amp_val=1, **kwargs):
         """
-        Create square beam
+        Create square Beam
         :param num: num of pixel wide
         :param size: physical size of array
-        :param width: physical width of square beam
+        :param width: physical width of square Beam
         :param offx: physical offset in x
         :param offy: physical offset in y
-        :param amp_val: beam amplitude, defaults to 1
-        :param kwargs: passed to beam class
+        :param amp_val: Beam amplitude, defaults to 1
+        :param kwargs: passed to Beam class
         """
-        self._size=size
-        #amp=np.zeros((num,num))
-        xv=np.linspace(-width/2-offx/2,width/2-offx/2,num=num)
-        xy=np.linspace(-width/2-offy/2,width/2-offy/2,num=num)
-        xx,yy=np.meshgrid(xv,xy)
-        amp=(abs(xx)<=size) * (abs(yy)<=size)
-        amp=amp*amp_val
+        self._size = size
+        xv = np.linspace(-width/2-offx/2,width/2-offx/2,num=num)
+        xy = np.linspace(-width/2-offy/2,width/2-offy/2,num=num)
+        xx, yy = np.meshgrid(xv,xy)
+        amp = (abs(xx) <= size) * (abs(yy) <= size)
+        amp = amp*amp_val
         #amp[np.abs(xx)<=size & np.abs(yy)<=size]=amp_val
-        super().__init__(amplitude=amp,width=width,**kwargs)
+        super().__init__(amplitude=amp, width=width, **kwargs)
 
     @property
     def size(self):
         return self._size
 
-class tophat_beam(beam):
+
+class TophatBeam(Beam):
     def __init__(self,num=512,radius=1e-4,width=1e-3,offx=0,offy=0,amp_val=1,**kwargs):
         #print(**kwargs)
         amp=np.zeros((num,num))
@@ -228,17 +241,17 @@ class tophat_beam(beam):
         super().__init__(amplitude=amp,width=width,**kwargs)
         
 
-class GaussianHermite_beam(beam):
+class GaussianHermiteBeam(Beam):
     def __init__(self,w0,m,n,num=512, wavelength=500e-9,width=1e-3,amp_val=1):
-        amp=Gaussian_beam.makeGaussian(num,fwhm=fwhm) #TODO fix this
+        amp=GaussianBeam.makeGaussian(num, fwhm=fwhm) #TODO fix this
         self._fwhm=fwhm
         super().__init__(amplitude=amp,wavelength=wavelength,width=width)
 
 
-class Gaussian_beam(beam):
+class GaussianBeam(Beam):
     def __init__(self,num=512,fwhm=0.5e-3, wavelength=500e-9,width=1e-3):
         fwhm_p = fwhm/width*num
-        amp=Gaussian_beam._makeGaussian(num,fwhm=fwhm_p)
+        amp=GaussianBeam._makeGaussian(num, fwhm=fwhm_p)
         self._fwhm=fwhm
         super().__init__(amplitude=amp,wavelength=wavelength,width=width)
 
@@ -268,7 +281,7 @@ class Gaussian_beam(beam):
 
 
 if __name__=='__main__':
-    from element import square_mask
+    from element import SquareMask
     from display import display
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -276,9 +289,9 @@ if __name__=='__main__':
     ch.setFormatter(formatter)
     if not logger.hasHandlers():
         logger.addHandler(ch)
-    b=beam(amplitude=np.ones((100,100)),width=3e-3)
-    sq=square_mask(b,size=0.2e-3,offx=0.1e-3,amp_val=0.1,ysize=.1e-3 )
-    #sq=bessel_CGH(b,2.405/b.width*2,mask_radius=b.width/2)
+    b=Beam(amplitude=np.ones((100, 100)), width=3e-3)
+    sq=SquareMask(b, size=0.2e-3, offx=0.1e-3, amp_val=0.1, ysize=.1e-3)
+    #sq=BesselCGH(beam,2.405/beam.width*2,mask_radius=beam.width/2)
     c=sq.apply(b)
     c.add_buffer(201)
     display(c,colorbar=True,num=1)

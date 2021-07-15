@@ -1,7 +1,8 @@
 import numpy as np
 from abc import ABC, abstractmethod
-import logging
-logger = logging.getLogger(__name__)
+import scipy.special as ss
+from loguru import logger
+#logger = logging.getLogger(__name__)
 
 class Element(ABC):
     def __init__(self, complex_transmission):
@@ -9,9 +10,9 @@ class Element(ABC):
 
     def apply(self, beam):
         """
-        Applies the optical Element to a given beam
+        Applies the optical Element to a given Beam
         :param beam:
-        :return: a new beam
+        :return: a new Beam
         """
         b = beam.clone_parameters()
         b.field = beam.field * self.complex_transmission
@@ -31,8 +32,26 @@ class ArbitraryMask(Element):
     def __init__(self, complex_field):
         super().__init__(complex_field)
 
+class PhaseConjugator(Element):
+    """
+    Conjugates in the input field
+    """
+    def __init__(self,flip=False):
+        """
+        :param flip: if true, also fliplr and flipud
+        """
+        self._flip = flip
 
-class circ_mask(Element):
+    def apply(self, beam):
+        b = beam.clone_parameters()
+        b.field = np.conjugate(beam.field)
+        if self._flip:
+            b.field = np.fliplr(b.field)
+            b.field = np.flipud(b.field)
+        return b
+
+
+class CircularMask(Element):
     def __init__(self, beam, radius=1e-3, offx=0, offy=0, amp_val=0):
         amp = np.ones((beam.num, beam.num))
         xv = np.linspace(-beam.width / 2 - offx / 2, beam.width / 2 - offx / 2, num=beam.num)
@@ -43,7 +62,7 @@ class circ_mask(Element):
         super().__init__(amp)
 
 
-class circ_aperture(Element):
+class CircularAperture(Element):
     def __init__(self, beam, radius=1e-3, offx=0, offy=0, amp_val=0):
         amp = np.ones((beam.num, beam.num))
         xv = np.linspace(-beam.width / 2 - offx / 2, beam.width / 2 - offx / 2, num=beam.num)
@@ -54,15 +73,15 @@ class circ_aperture(Element):
         super().__init__(amp)
 
 
-class bessel_CGH(Element):
+class BesselCGH(Element):
     def __init__(self, beam, kr, mask_radius=None, zmax=None):
         """Generates as Bessel function with complex transmission (ie amplitude can go negative)
         Parameters
         ----------
-        beam - beam class to base Element on
-        kr - float -radial frequency
-        mask_radius - float (optional) apply a radial circ_aperture if set with this radius
-        zmax - float - (optional) ignore kr and calculte max beam range. Use beam.width or mask_radius if set.
+        Beam - Beam class to base Element on
+        kr - float - radial frequency
+        mask_radius - float (optional) apply a radial CircularAperture if set with this radius
+        zmax - float - (optional) ignore kr and calculte max Beam range. Use Beam.width or mask_radius if set.
         """
         x = np.linspace(-beam.width / 2, beam.width / 2, num=beam.num)
         xv, yv = np.meshgrid(x, x)
@@ -78,13 +97,13 @@ class bessel_CGH(Element):
 
         J = ss.j0(kr * r)
         if mask_radius is not None:
-            c = circ_aperture(beam, radius=mask_radius)
+            c = CircularAperture(beam, radius=mask_radius)
             J = J * c.complex_transmission
-        logger.info('Bessel beam kr {:.3f}, max range {:.3f}m'.format(kr, Bw * k / kr))
+        logger.info('Bessel Beam kr {:.3f}, max range {:.3f}m'.format(kr, Bw * k / kr))
         super().__init__(J)
 
 
-class square_mask(Element):
+class SquareMask(Element):
     def __init__(self, beam, size=1e-4, offx=0, offy=0, amp_val=0, ysize=None):
         if ysize is None:
             ysize = size
@@ -102,7 +121,7 @@ class square_mask(Element):
         super().__init__(amp)
 
 
-class square_apperture(Element):
+class SquareAperture(Element):
     def __init__(self, beam, size=1e-4, offx=0, offy=0, amp_val=0, ysize=None):
         if ysize is None:
             ysize = size
@@ -120,8 +139,15 @@ class square_apperture(Element):
         super().__init__(amp)
 
 
-class phase_wedge(Element):
+class PhaseWedge(Element):
     def __init__(self, beam, xsweep=0, ysweep=0, piston=0):
+        """
+        Generates a phase wedge the size of beam
+        :param beam: Beam object
+        :param xsweep: phase sweep in x direction (radians)
+        :param ysweep: phase sweep in y direction (radians)
+        :param piston: piston offset (radians)
+        """
         num = beam.num
         # amp=np.zeros((num,num))
         xv = np.linspace(-xsweep / 2, xsweep / 2, num=num)
@@ -132,15 +158,15 @@ class phase_wedge(Element):
         super().__init__(amp)
 
 
-class phase_lens(Element):
+class PhaseLens(Element):
     def __init__(self, beam, focal_length, offx=0, offy=0, radius=None, circular_mask = True):
         """
         Generates a phase lens
-        :param beam: beam object
+        :param beam: Beam object
         :param focal_length: focal length
         :param offx: x offset, default 0
         :param offy: y offset, default 0
-        :param radius: radius, defaults to beam width /2
+        :param radius: radius, defaults to Beam width /2
         :param circular_mask: if true (default) apply circular mask of given radius, if false radius is used to define
         the length of the square edge
         """
@@ -148,7 +174,7 @@ class phase_lens(Element):
         if radius is None:
             radius = beam.width / 2
 
-        amp = np.zeros((num, num))
+        #amp = np.zeros((num, num))
         xv = np.linspace(-beam.width / 2 - offx / 2, beam.width / 2 - offx / 2, num=num)
         xy = np.linspace(-beam.width / 2 - offy / 2, beam.width / 2 - offy / 2, num=num)
         xx, yy = np.meshgrid(xv, xy)
@@ -159,11 +185,13 @@ class phase_lens(Element):
             ampx = np.where( abs(xx)<=radius,1,0)
             ampy = np.where(abs(yy) <= radius, 1, 0)
             amp = ampx*ampy
-        #  rad=math.sqrt(f**2-(beam.width/2)**2)
-        phase = R ** 2 * np.pi / (beam.wavelength * focal_length)
+        #  rad=math.sqrt(f**2-(Beam.width/2)**2)
+        logger.debug(f"Phase lens radius {radius}, width = {beam.width} focal length {focal_length} correction {beam.width/(radius*2)}")
+        phase = R ** 2 * np.pi / (beam.wavelength * focal_length) #* beam.width/(radius*2)
+        logger.debug(f'Phase max {np.max(phase)}, min {np.min(phase)}')
         super().__init__(amp * np.exp(1j * phase))
 
 
-class axicon(Element):
+class Axicon(Element):
     def __init__(self, beam, phi, n1=1.5, offx=0, offy=0):
-        pass
+        raise NotImplemented()

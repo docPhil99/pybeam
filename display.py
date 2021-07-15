@@ -2,16 +2,15 @@ import PMB.imutils.graphics as gr
 import abc
 import matplotlib.pyplot as plt
 import numpy as np
-import logging
-logger = logging.getLogger(__name__)
+from loguru import logger
 #class display(abc.ABC):  # TODO is this needed?
 #    def __init__(self):
 #        pass
 
 def displayInt(beam, cross_section=False, title=None, nthroot=1, colorbar=True, **kwargs):
     """
-    Plots the beam intensity
-    :param beam: complex beam
+    Plots the Beam intensity
+    :param beam: complex Beam
     :param cross_section: if true, show the intensity as an image, a cross section 2D plot through the centre + phase
     :param title: title
     :param nthroot: normally 1, otherwise use intensity^(1/nthroot)
@@ -45,7 +44,7 @@ def displayInt(beam, cross_section=False, title=None, nthroot=1, colorbar=True, 
         ax[2].set_title('Phase')
         fig.suptitle(title)
     return fig, ax
-    # ax1.set_xticklabels(np.linspace(-beam.width/2,beam.width/2,5))
+    # ax1.set_xticklabels(np.linspace(-Beam.width/2,Beam.width/2,5))
 
 def displayInt3D(beam, title=None, nthroot=1, colorbar=True, **kwargs):
     fig = plt.figure(**kwargs)
@@ -58,9 +57,9 @@ def displayInt3D(beam, title=None, nthroot=1, colorbar=True, **kwargs):
 
     # Make data.
     x = np.linspace(-beam.width / 2, beam.width / 2, beam.num)
-    #Y = np.arange(-beam.width / 2, beam.width / 2, 0.25)
+    #Y = np.arange(-Beam.width / 2, Beam.width / 2, 0.25)
     X, Y = np.meshgrid(x,x)
-    #fig, ax = gr.draw(ints, Extent=[-beam.width / 2, beam.width / 2, -beam.width / 2, beam.width / 2],
+    #fig, ax = gr.draw(ints, Extent=[-Beam.width / 2, Beam.width / 2, -Beam.width / 2, Beam.width / 2],
     #                      title=title, colorbar=colorbar)
     ax = fig.gca(projection='3d')
     ax.plot_surface(X,Y,beam.intensity)
@@ -69,7 +68,15 @@ def displayInt3D(beam, title=None, nthroot=1, colorbar=True, **kwargs):
 
 
 def display(beam, title=None, num=None, **kwargs):
-    return gr.draw(beam.field, num=num, extent=[-beam.width / 2, beam.width / 2, -beam.width / 2,
-                                                beam.width / 2])  # , title=title,**kwargs)
+    if not num:
+        f=plt.figure()
+        num=f.number
+        logger.debug(f'Created new figure number {num}')
+
+    return gr.draw(beam.field, num=num, title=title,colorbar=True, extent=[-beam.width / 2, beam.width / 2, -beam.width / 2,
+                                                beam.width / 2] ,**kwargs)
+
+def drawnow():
+    gr.drawnow()
 
 

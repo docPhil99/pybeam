@@ -1,11 +1,8 @@
-import PMB.imutils.graphics as gr
-import abc
+
+import pybeam.utils.graphics as gr
 import matplotlib.pyplot as plt
 import numpy as np
 from loguru import logger
-#class display(abc.ABC):  # TODO is this needed?
-#    def __init__(self):
-#        pass
 
 def displayInt(beam, cross_section=False, title=None, nthroot=1, colorbar=True, **kwargs):
     """
@@ -73,7 +70,7 @@ def display(beam, title=None, num=None, **kwargs):
         num=f.number
         logger.debug(f'Created new figure number {num}')
 
-    return gr.draw(beam.field, num=num, title=title,colorbar=True, extent=[-beam.width / 2, beam.width / 2, -beam.width / 2,
+    return gr.draw(beam.field, num=num, title=title, extent=[-beam.width / 2, beam.width / 2, -beam.width / 2,
                                                 beam.width / 2] ,**kwargs)
 
 def drawnow():

@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import logging
 logger = logging.getLogger(__name__)
 
+
 class Detector(ABC):
     @abstractmethod
     def __init__(self):

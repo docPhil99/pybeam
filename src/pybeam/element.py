@@ -2,7 +2,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 import scipy.special as ss
 from loguru import logger
-#logger = logging.getLogger(__name__)
+
 
 class Element(ABC):
     def __init__(self, complex_transmission):
@@ -32,11 +32,12 @@ class ArbitraryMask(Element):
     def __init__(self, complex_field):
         super().__init__(complex_field)
 
+
 class PhaseConjugator(Element):
     """
-    Conjugates in the input field
+    Conjugates the input field
     """
-    def __init__(self,flip=False):
+    def __init__(self, flip=False):
         """
         :param flip: if true, also fliplr and flipud
         """
@@ -194,4 +195,6 @@ class PhaseLens(Element):
 
 class Axicon(Element):
     def __init__(self, beam, phi, n1=1.5, offx=0, offy=0):
-        raise NotImplemented()
+        raise NotImplementedError()
+
+

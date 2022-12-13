@@ -15,8 +15,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-]
 
+]
+dependencies =["loguru", "numpy", "matplotlib","scipy"]
 [project.urls]
 "Homepage" = "https://github.com/docPhil99/pybeam"
 "Bug Tracker" = "https://github.com/docPhil99/pybeam/issues"

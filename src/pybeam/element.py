@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from abc import ABC, abstractmethod
 import scipy.special as ss
@@ -189,8 +191,27 @@ class PhaseLens(Element):
         #  rad=math.sqrt(f**2-(Beam.width/2)**2)
         logger.debug(f"Phase lens radius {radius}, width = {beam.width} focal length {focal_length} correction {beam.width/(radius*2)}")
         phase = R ** 2 * np.pi / (beam.wavelength * focal_length) #* beam.width/(radius*2)
-        logger.debug(f'Phase max {np.max(phase)}, min {np.min(phase)}')
+        logger.debug(f'Phase max is {np.max(phase)}, min {np.min(phase)}')
         super().__init__(amp * np.exp(1j * phase))
+
+class BinaryPhaseLens(PhaseLens):
+    def __init__(self, beam, focal_length,phi1=0,phi2=math.pi, offx=0, offy=0, radius=None, circular_mask=True):
+        """
+        Generates a phase lens
+        :param beam: Beam object
+        :param focal_length: focal length
+        :param offx: x offset, default 0
+        :param offy: y offset, default 0
+        :param radius: radius, defaults to Beam width /2
+        :param circular_mask: if true (default) apply circular mask of given radius, if false radius is used to define
+        the length of the square edge
+        """
+        super().__init__(beam, focal_length, offx=offx, offy=offy, radius=radius, circular_mask=circular_mask)
+
+        angle  = np.angle(self.complex_transmission)
+        new_angle = np.ones_like(angle)*phi1
+        new_angle[(0 < angle) & (angle < np.pi)] = phi2
+        self.complex_transmission = np.abs(self.complex_transmission)*np.exp(1j*new_angle)
 
 
 class Axicon(Element):

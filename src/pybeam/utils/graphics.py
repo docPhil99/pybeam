@@ -11,6 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from matplotlib import pyplot as plt
+import matplotlib
 import numpy as np
 import pybeam.utils.arraymaths as ar
 
@@ -38,7 +39,7 @@ except ImportError:
 _origin = 'upper'
 
 
-def __drawcomplex(img, myExtent, colorbar, bad_phase_colour=(1, 0, 0)):
+def __drawcomplex(img, myExtent, colorbar, bad_phase_colour='b'):
     ax = [None] * 4
     if img.ndim != 2:
         raise PMBexecption('Wrong number of dimensions for complex display')
@@ -67,12 +68,21 @@ def __drawcomplex(img, myExtent, colorbar, bad_phase_colour=(1, 0, 0)):
     indx2 = ints == 0
     ang = np.angle(img)
     if bad_phase_colour:
-        colour_ang = np.dstack([ang, ang, ang])
-        colour_ang = (colour_ang - colour_ang.min()) / (colour_ang.max() - colour_ang.min())
-        colour_ang[indx2, 0] = bad_phase_colour[0]
-        colour_ang[indx2, 1] = bad_phase_colour[1]
-        colour_ang[indx2, 2] = bad_phase_colour[2]
-        plt.imshow(colour_ang, interpolation='nearest', origin=_origin, extent=myExtent)
+        #zm = np.ma.masked_values(ints,0)
+        zm = np.ma.masked_where(ints==0 , ang)
+        # Set up a colormap:
+        palette = matplotlib.cm.gray
+        # palette.set_over('r', 1.0)
+        # palette.set_under('g', 1.0)
+        palette.set_bad(bad_phase_colour, 1.0)
+        #colour_ang = np.dstack([ang, ang, ang])
+        #colour_ang = (colour_ang - colour_ang.min()) / (colour_ang.max() - colour_ang.min())
+        #colour_ang[indx2, 0] = bad_phase_colour[0]
+        #colour_ang[indx2, 1] = bad_phase_colour[1]
+        #colour_ang[indx2, 2] = bad_phase_colour[2]
+        #plt.imshow(colour_ang, interpolation='nearest', origin=_origin, extent=myExtent)
+        plt.imshow(zm,cmap=palette,interpolation='bilinear',
+                   norm = matplotlib.colors.Normalize(vmin = ang.min(), vmax = ang.max(), clip = False))
     else:
         plt.imshow(ang, interpolation='nearest', cmap='gray', origin=_origin, extent=myExtent)
     plt.title('Phase')
@@ -99,7 +109,7 @@ def __drawimg(img, myExtent, colorbar):
 
 
 def draw(img1, *args, extent=None, colorbar=False, newFigure=False, BGR=False, num=None, title=None,
-         bad_phase_colour=(1, 0, 0)):
+         bad_phase_colour='b'):
     """my custom image drawing function
 
     custom image drawing function to cope with different types such grey scale,
@@ -116,8 +126,8 @@ def draw(img1, *args, extent=None, colorbar=False, newFigure=False, BGR=False, n
     extent=[left,right,top,bottom], optional
         sets the extent of the image,
     BGR = False, optional, bool, if true image is BGR color,othewise RGB
-    bad_phase_colour: tuple
-        rgb colour tuple of the colour to use if phase is not defined on the complex plots. Set to None to not use."""
+    bad_phase_colour: string
+        colour string eg 'b' of the colour to use if phase is not defined on the complex plots. Set to None to not use."""
     # options={'Extent':None,'colorbar':False,'newFigure':False,'BGR':False}
     # options.update(kwargs)
     myExtent = extent

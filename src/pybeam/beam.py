@@ -126,8 +126,8 @@ class Beam:
 
     def clone_parameters(self):
         """Creates a new Beam with the same parameters - but no amplitude/phase data"""
-        _arg_dict = {k: self.__dict__[k] for k in self._arglist}
-        return Beam(**_arg_dict)
+        self._arg_dict = {k: self.__dict__[k] for k in self._arglist}
+        return Beam(**self._arg_dict)
 
     @property
     def num(self):

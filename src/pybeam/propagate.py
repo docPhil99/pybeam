@@ -59,7 +59,7 @@ class propergator(ABC):
         """
         
         critical_sample= beam.wavelength * z_distance / beam.width
-        delta_x = beam.width / beam.amplitude.shape[0]
+        delta_x = beam.width / beam._amplitude.shape[0]
         guardband_ratio= beam.width / object_width
         Fresnel_number= object_width ** 2 / (beam.wavelength * z_distance)
         
@@ -81,7 +81,7 @@ class propergator(ABC):
         :param z_distance:
         :return: propagated beam
         """
-        M=beam.amplitude.shape[0]
+        M=beam._amplitude.shape[0]
         #print('M ',M)
         dx= beam.width / M  #sample inteval
         #print('dx ',dx)
@@ -107,7 +107,7 @@ class propergator(ABC):
         :param z_distance:
         :return: propagated beam
         """
-        M=beam.amplitude.shape[0]
+        M=beam._amplitude.shape[0]
         print('M ',M)
         dx= beam.width / M  #sample inteval
         print('dx ',dx)

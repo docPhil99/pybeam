@@ -127,7 +127,7 @@ def draw(img1, *args, extent=None, colorbar=False, newFigure=False, BGR=False, n
         sets the extent of the image,
     BGR = False, optional, bool, if true image is BGR color,othewise RGB
     bad_phase_colour: string
-        colour string eg 'b' of the colour to use if phase is not defined on the complex plots. Set to None to not use."""
+        colour string eg 'b' of the colour to use if _phase is not defined on the complex plots. Set to None to not use."""
     # options={'Extent':None,'colorbar':False,'newFigure':False,'BGR':False}
     # options.update(kwargs)
     myExtent = extent

@@ -23,7 +23,7 @@ if __name__ == '__main__':
     displayInt(e,colorbar=True,num=4)
     lens = PhaseLens(b,focal_length=3e-2)
     l = lens.apply(b)
-    display(l,colorbar=True,num=5 ,title='with bad phase')
-    display(l, colorbar=True, num=6, title='no bad phase', bad_phase_colour=None)
+    display(l,colorbar=True,num=5 ,title='with bad _phase')
+    display(l, colorbar=True, num=6, title='no bad _phase', bad_phase_colour=None)
 
     drawnow()

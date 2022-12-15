@@ -3,12 +3,13 @@ import pybeam.utils.graphics as gr
 import matplotlib.pyplot as plt
 import numpy as np
 from loguru import logger
+from .element import Element
 
 def displayInt(beam, cross_section=False, title=None, nthroot=1, colorbar=True, **kwargs):
     """
     Plots the Beam intensity
     :param beam: complex Beam
-    :param cross_section: if true, show the intensity as an image, a cross section 2D plot through the centre + phase
+    :param cross_section: if true, show the intensity as an image, a cross section 2D plot through the centre + _phase
     :param title: title
     :param nthroot: normally 1, otherwise use intensity^(1/nthroot)
     :param colorbar: show colour bar
@@ -37,13 +38,22 @@ def displayInt(beam, cross_section=False, title=None, nthroot=1, colorbar=True, 
         ax[1].plot(np.linspace(-beam.width / 2, beam.width / 2, bi.shape[0]), bi[r, :])
         ax[1].set_title('Int')
         ax[2] = fig.add_subplot(2, 2, 4)
-        ax[2].plot(np.linspace(-beam.width / 2, beam.width / 2, bi.shape[0]), np.unwrap(beam.phase[r, :]))
+        ax[2].plot(np.linspace(-beam.width / 2, beam.width / 2, bi.shape[0]), np.unwrap(beam._phase[r, :]))
         ax[2].set_title('Phase')
         fig.suptitle(title)
     return fig, ax
     # ax1.set_xticklabels(np.linspace(-Beam.width/2,Beam.width/2,5))
 
 def displayInt3D(beam, title=None, nthroot=1, colorbar=True, **kwargs):
+    """
+    Surface plot of a beams intensity
+    :param beam:
+    :param title:
+    :param nthroot:
+    :param colorbar:
+    :param kwargs:
+    :return:
+    """
     fig = plt.figure(**kwargs)
     fig.clf()
 
@@ -65,12 +75,25 @@ def displayInt3D(beam, title=None, nthroot=1, colorbar=True, **kwargs):
 
 
 def display(beam, title=None, num=None, **kwargs):
+    """
+    Diplays _amplitude, real, imaginary and _phase components of a beam, or element or numpy array
+    :param beam:
+    :param title:
+    :param num:
+    :param kwargs:
+    :return:
+    """
     if not num:
         f=plt.figure()
         num=f.number
         logger.debug(f'Created new figure number {num}')
 
-    return gr.draw(beam.field, num=num, title=title, extent=[-beam.width / 2, beam.width / 2, -beam.width / 2,
+    if isinstance(beam,Element):
+        return gr.draw(beam.complex_transmission, title=title,**kwargs)
+    elif isinstance(beam, np.ndarray):
+        return gr.draw(beam, title=title, **kwargs)
+    else:
+        return gr.draw(beam.field, num=num, title=title, extent=[-beam.width / 2, beam.width / 2, -beam.width / 2,
                                                 beam.width / 2] ,**kwargs)
 
 def drawnow():

@@ -17,6 +17,7 @@ class Element(ABC):
         :return: a new Beam
         """
         b = beam.clone_parameters()
+        #b = beam.copy()
         b.field = beam.field * self.complex_transmission
         return b
 
@@ -78,7 +79,7 @@ class CircularAperture(Element):
 
 class BesselCGH(Element):
     def __init__(self, beam, kr, mask_radius=None, zmax=None):
-        """Generates as Bessel function with complex transmission (ie amplitude can go negative)
+        """Generates as Bessel function with complex transmission (ie _amplitude can go negative)
         Parameters
         ----------
         Beam - Beam class to base Element on
@@ -145,10 +146,10 @@ class SquareAperture(Element):
 class PhaseWedge(Element):
     def __init__(self, beam, xsweep=0, ysweep=0, piston=0):
         """
-        Generates a phase wedge the size of beam
+        Generates a _phase wedge the size of beam
         :param beam: Beam object
-        :param xsweep: phase sweep in x direction (radians)
-        :param ysweep: phase sweep in y direction (radians)
+        :param xsweep: _phase sweep in x direction (radians)
+        :param ysweep: _phase sweep in y direction (radians)
         :param piston: piston offset (radians)
         """
         num = beam.num
@@ -164,7 +165,7 @@ class PhaseWedge(Element):
 class PhaseLens(Element):
     def __init__(self, beam, focal_length, offx=0, offy=0, radius=None, circular_mask = True):
         """
-        Generates a phase lens
+        Generates a _phase lens
         :param beam: Beam object
         :param focal_length: focal length
         :param offx: x offset, default 0
@@ -194,10 +195,11 @@ class PhaseLens(Element):
         logger.debug(f'Phase max is {np.max(phase)}, min {np.min(phase)}')
         super().__init__(amp * np.exp(1j * phase))
 
+
 class BinaryPhaseLens(PhaseLens):
     def __init__(self, beam, focal_length,phi1=0,phi2=math.pi, offx=0, offy=0, radius=None, circular_mask=True):
         """
-        Generates a phase lens
+        Generates a binary _phase lens
         :param beam: Beam object
         :param focal_length: focal length
         :param offx: x offset, default 0

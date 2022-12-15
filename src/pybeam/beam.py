@@ -18,29 +18,29 @@ class Beam:
         """ basic Beam container class,
         Parameters
         ----------
-        amplitude - numpy array (real only) amplitude
-        phase - numpy arrays (real only). phase will be set to zero if amplitude is set but phase is not. 
-        input_field  - numpy array (complex data) sets a complex amplitude field. amplitude and phase are ignored if this is set. 
+        _amplitude - numpy array (real only) _amplitude
+        _phase - numpy arrays (real only). _phase will be set to zero if _amplitude is set but _phase is not.
+        input_field  - numpy array (complex data) sets a complex _amplitude field. _amplitude and _phase are ignored if this is set.
         wavelength - float. The wavelength of the Beam.
         width - float. The physical width of the array data 
-        num  - int. The number of rows of pixels in the array (ignored if amplitude/phase/field are set).
+        num  - int. The number of rows of pixels in the array (ignored if _amplitude/_phase/field are set).
         units - string. The physical name of the width unit. For reference only, it has not effect.
         name - string. The name of the Beam. For reference only, it has not effect.
         """
         self.units = units
         self.name = name
-        self.phase = phase
-        self.amplitude = amplitude
+        self._phase = phase
+        self._amplitude = amplitude
         # copy the arg list but exclude the numpy arrays
         self._arglist = [k for k in locals().keys() if k not in ['amplitude', 'phase', 'input_field', 'self', 'num']]
         if input_field is not None:
             self.field = input_field
         else:    
-            self.amplitude = amplitude
+            self._amplitude = amplitude
             if phase is not None:
-                self.phase = phase
+                self._phase = phase
             elif amplitude is not None:
-                self.phase = np.zeros(amplitude.shape)
+                self._phase = np.zeros(amplitude.shape)
         self.wavelength = wavelength
         self.width = width
         self._num = num
@@ -114,7 +114,7 @@ class Beam:
         return deepcopy(self)
 
     def split(self, ratio=0.5):
-        """splits the amplitude by the amount of ratio
+        """splits the _amplitude by the amount of ratio
         :param ratio: split the beams by this ratio, defaults to 0.5
         :return: (a,b) two new Beam objects with amplitudes split by `ratio` and `1-ratio` respectively
         """
@@ -125,17 +125,33 @@ class Beam:
         return a, b
 
     def clone_parameters(self):
-        """Creates a new Beam with the same parameters - but no amplitude/phase data"""
+        """Creates a new Beam with the same parameters - but no _amplitude/_phase data"""
         self._arg_dict = {k: self.__dict__[k] for k in self._arglist}
         return Beam(**self._arg_dict)
 
     @property
     def num(self):
-        """Returns size of data array, either from size of amplitude array if set or the num parameter""" 
-        if self.phase is not None:
-            return self.phase.shape[0]
+        """Returns size of data array, either from size of _amplitude array if set or the num parameter"""
+        if self._phase is not None:
+            return self._phase.shape[0]
         else:
             return self._num
+
+    @property
+    def phase(self):
+        return self._phase
+
+    @phase.setter
+    def phase(self, value):
+        self._phase = value
+
+    @property
+    def amplitude(self):
+        return self._amplitude
+
+    @amplitude.setter
+    def amplitude(self, value):
+        self._amplitude = value
 
     @property
     def field(self):
@@ -143,7 +159,7 @@ class Beam:
         Complex field
         :return: numpy complex field
         """
-        return self.amplitude*np.exp(1j*self.phase)
+        return self._amplitude * np.exp(1j * self._phase)
 
     @field.setter
     def field(self, val):
@@ -152,8 +168,8 @@ class Beam:
         :param val: numpy complex field
         :return: nothing
         """
-        self.amplitude = np.absolute(val)
-        self.phase = np.angle(val)
+        self._amplitude = np.absolute(val)
+        self._phase = np.angle(val)
 
     @property
     def intensity(self):
@@ -161,7 +177,7 @@ class Beam:
         Intensity
         :return: numpy array
         """
-        return self.amplitude**2
+        return self._amplitude ** 2
 
     def add_buffer(self, number):
         """
@@ -205,14 +221,14 @@ class SquareBeam(Beam):
         :param width: physical width of square Beam
         :param offx: physical offset in x
         :param offy: physical offset in y
-        :param amp_val: Beam amplitude, defaults to 1
+        :param amp_val: Beam _amplitude, defaults to 1
         :param kwargs: passed to Beam class
         """
         self._size = size
-        xv = np.linspace(-width/2-offx/2, width/2-offx/2, num=num)
-        xy = np.linspace(-width/2-offy/2, width/2-offy/2, num=num)
+        xv = np.linspace(-width/2-offy/2, width/2-offy/2, num=num)
+        xy = np.linspace(-width/2-offx/2, width/2-offx/2, num=num)
         xx, yy = np.meshgrid(xv, xy)
-        amp = (abs(xx) <= size) * (abs(yy) <= size)
+        amp = (abs(xx) <= size/2) * (abs(yy) <= size/2)
         amp = amp*amp_val
         #amp[np.abs(xx)<=size & np.abs(yy)<=size]=amp_val
         super().__init__(amplitude=amp, width=width, **kwargs)

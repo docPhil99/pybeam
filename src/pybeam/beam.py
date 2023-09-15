@@ -15,17 +15,16 @@ from loguru import logger
 class Beam:
     def __init__(self, amplitude=None, phase=None, input_field=None, wavelength=500e-9, width=1e-3, num=512,
                   units='m', name='Beam'):
-        """ basic Beam container class,
-        Parameters
-        ----------
-        _amplitude - numpy array (real only) _amplitude
-        _phase - numpy arrays (real only). _phase will be set to zero if _amplitude is set but _phase is not.
-        input_field  - numpy array (complex data) sets a complex _amplitude field. _amplitude and _phase are ignored if this is set.
-        wavelength - float. The wavelength of the Beam.
-        width - float. The physical width of the array data 
-        num  - int. The number of rows of pixels in the array (ignored if _amplitude/_phase/field are set).
-        units - string. The physical name of the width unit. For reference only, it has not effect.
-        name - string. The name of the Beam. For reference only, it has not effect.
+        """The basic Beam class. It holds the complex amplitude and physical parameters such as width and wavelength
+
+        :param amplitude - numpy array (real only) _amplitude
+        :param phase - numpy arrays (real only). _phase will be set to zero if _amplitude is set but _phase is not.
+        :param input_field  - numpy array (complex data) sets a complex _amplitude field. _amplitude and _phase are ignored if this is set.
+        :param wavelength - float. The wavelength of the Beam.
+        :param width - float. The physical width of the array data
+        :param num  - int. The number of rows of pixels in the array (ignored if _amplitude/_phase/field are set).
+        :param units - string. The physical name of the width unit. For reference only, it has not effect.
+        :param name - string. The name of the Beam. For reference only, it has not effect.
         """
         self.units = units
         self.name = name
@@ -39,6 +38,8 @@ class Beam:
             self._amplitude = amplitude
             if phase is not None:
                 self._phase = phase
+                if amplitude is None:
+                    self._amplitude = np.ones(phase.shape)
             elif amplitude is not None:
                 self._phase = np.zeros(amplitude.shape)
         self.wavelength = wavelength
@@ -60,10 +61,10 @@ class Beam:
 
     def __sub__(self, beam2):
         """
-                Subtracts beam2 complex field to the Beam.
-                :param beam2:  either a Beam class or a scalar or numpy array of same size as Beam
-                :return: added beams
-                """
+        Subtracts beam2 complex field to the Beam.
+        :param beam2:  either a Beam class or a scalar or numpy array of same size as Beam
+        :return: added beams
+        """
         # TODO test physical parameters match,
         if isinstance(beam2, Beam):
             f = self.field - beam2.field

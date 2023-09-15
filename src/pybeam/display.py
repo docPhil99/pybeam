@@ -1,4 +1,5 @@
-
+import matplotlib
+matplotlib.use('TkAgg')
 import pybeam.utils.graphics as gr
 import matplotlib.pyplot as plt
 import numpy as np
@@ -99,4 +100,5 @@ def display(beam, title=None, num=None, **kwargs):
 def drawnow():
     gr.drawnow()
 
-
+def show():
+    plt.show()

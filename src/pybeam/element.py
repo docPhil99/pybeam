@@ -118,7 +118,7 @@ class SquareMask(Element):
         xy = np.linspace(-beam.width / 2 - offy / 2, beam.width / 2 - offy / 2, num=num)
         xx, yy = np.meshgrid(xv, xy)
         amp = (abs(xx) <= size) * (abs(yy) <= ysize)
-        amp = np.invert(amp).astype(np.float)
+        amp = np.invert(amp).astype(np.float64)
         amp[amp == 0] = amp_val
         # gr.draw(amp,num=2,colorbar=True)
         # amp=amp*amp_val
@@ -135,8 +135,8 @@ class SquareAperture(Element):
         xv = np.linspace(-beam.width / 2 - offx / 2, beam.width / 2 - offx / 2, num=num)
         xy = np.linspace(-beam.width / 2 - offy / 2, beam.width / 2 - offy / 2, num=num)
         xx, yy = np.meshgrid(xv, xy)
-        amp = ((abs(xx) <= size) * (abs(yy) <= ysize)).astype(np.float)
-        # amp = np.invert(amp).astype(np.float)
+        amp = ((abs(xx) <= size) * (abs(yy) <= ysize)).astype(np.float64)
+        # amp = np.invert(amp).astype(np.float64)
         amp[amp == 0] = amp_val
         # gr.draw(amp,num=2,colorbar=True)
         # amp=amp*amp_val

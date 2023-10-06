@@ -17,14 +17,14 @@ class Beam:
                   units='m', name='Beam'):
         """The basic Beam class. It holds the complex amplitude and physical parameters such as width and wavelength
 
-        :param amplitude - numpy array (real only) _amplitude
-        :param phase - numpy arrays (real only). _phase will be set to zero if _amplitude is set but _phase is not.
-        :param input_field  - numpy array (complex data) sets a complex _amplitude field. _amplitude and _phase are ignored if this is set.
-        :param wavelength - float. The wavelength of the Beam.
-        :param width - float. The physical width of the array data
-        :param num  - int. The number of rows of pixels in the array (ignored if _amplitude/_phase/field are set).
-        :param units - string. The physical name of the width unit. For reference only, it has not effect.
-        :param name - string. The name of the Beam. For reference only, it has not effect.
+        * amplitude - numpy array (real only) _amplitude
+        * phase - numpy arrays (real only). _phase will be set to zero if _amplitude is set but _phase is not.
+        * input_field  - numpy array (complex data) sets a complex _amplitude field. _amplitude and _phase are ignored if this is set.
+        * wavelength - float. The wavelength of the Beam.
+        * width - float. The physical width of the array data
+        * num  - int. The number of rows of pixels in the array (ignored if _amplitude/_phase/field are set).
+        * units - string. The physical name of the width unit. For reference only, it has not effect.
+        * name - string. The name of the Beam. For reference only, it has not effect.
         """
         self.units = units
         self.name = name
@@ -49,8 +49,9 @@ class Beam:
     def __iadd__(self, beam2):
         """
         Adds beam2 complex field to the Beam.
-        :param beam2:  either a Beam class or a scalar or numpy array of same size as Beam
-        :return: added beams
+
+        * beam2:  either a Beam class or a scalar or numpy array of same size as Beam
+        * return: added beams
         """
         if isinstance(beam2, Beam):
             # TODO test physical parameters match,
@@ -62,8 +63,9 @@ class Beam:
     def __sub__(self, beam2):
         """
         Subtracts beam2 complex field to the Beam.
-        :param beam2:  either a Beam class or a scalar or numpy array of same size as Beam
-        :return: added beams
+
+        * beam2:  either a Beam class or a scalar or numpy array of same size as Beam
+        * return: added beams
         """
         # TODO test physical parameters match,
         if isinstance(beam2, Beam):
@@ -75,8 +77,9 @@ class Beam:
     def __add__(self, beam2):
         """
         Adds beam2 complex field to the Beam.
-        :param beam2:  either a Beam class or a scalar or numpy array of same size as Beam
-        :return: added beams
+
+        * beam2:  either a Beam class or a scalar or numpy array of same size as Beam
+        * return: added beams
         """
         # TODO test physical parameters match,
         if isinstance(beam2, Beam):
@@ -110,14 +113,17 @@ class Beam:
 
     def copy(self):
         """
-        :return: deepcopy of Beam
+        Perform a deepcopy of the Beam object
+
+        * return: deepcopy of Beam
         """
         return deepcopy(self)
 
     def split(self, ratio=0.5):
         """splits the _amplitude by the amount of ratio
-        :param ratio: split the beams by this ratio, defaults to 0.5
-        :return: (a,b) two new Beam objects with amplitudes split by `ratio` and `1-ratio` respectively
+
+        * ratio: split the beams by this ratio, defaults to 0.5
+        * return: (a,b) two new Beam objects with amplitudes split by `ratio` and `1-ratio` respectively
         """
         a = self.copy(self)
         b = self.copy(self)
@@ -132,7 +138,7 @@ class Beam:
 
     @property
     def num(self):
-        """Returns size of data array, either from size of _amplitude array if set or the num parameter"""
+        """Returns size of data array, either from size of the amplitude array if set or the num parameter"""
         if self._phase is not None:
             return self._phase.shape[0]
         else:
@@ -140,6 +146,9 @@ class Beam:
 
     @property
     def phase(self):
+        """
+        The phase of the beam. Note this is a real number in radians, not the complex representation
+        """
         return self._phase
 
     @phase.setter
@@ -148,6 +157,9 @@ class Beam:
 
     @property
     def amplitude(self):
+        """
+        The amplitude of the beam. Note this a real value, not the complex amplitude
+        """
         return self._amplitude
 
     @amplitude.setter
@@ -157,18 +169,13 @@ class Beam:
     @property
     def field(self):
         """
-        Complex field
-        :return: numpy complex field
+        The complex amplitude field as numpy complex field
         """
         return self._amplitude * np.exp(1j * self._phase)
 
     @field.setter
     def field(self, val):
-        """
-        Complex field
-        :param val: numpy complex field
-        :return: nothing
-        """
+
         self._amplitude = np.absolute(val)
         self._phase = np.angle(val)
 

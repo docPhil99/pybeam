@@ -108,9 +108,9 @@ class propergator(ABC):
         :return: propagated beam
         """
         M=beam._amplitude.shape[0]
-        print('M ',M)
+        #print('M ',M)
         dx= beam.width / M  #sample inteval
-        print('dx ',dx)
+        #print('dx ',dx)
         #k=2*np.pi/beam.wavelength
         #fx=np.arange(-1/(2*dx),1/(2*dx)+1/beam.width,1/beam.width)
         fx=np.linspace(-1/(2*dx),1/(2*dx),M)
